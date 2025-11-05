@@ -470,9 +470,6 @@ img {
   box-shadow: 0 0 10px rgba(20, 20, 20, 0.3);
 }
 
-.page-wrap {
-  margin: 0 auto;
-}
 @media only all and (min-width: 1200px) {
   .page-wrap {
     width: 1170px;
@@ -489,20 +486,19 @@ img {
     width: 90%;
   }
 }
-
-.page-content {
-  padding-top: 40px;
+.page-wrap {
+  margin: 0 auto;
 }
+
 .page-content:after {
   content: "";
   display: table;
   clear: both;
 }
-
-.site-meta {
-  float: right;
-  text-align: center;
+.page-content {
+  padding-top: 40px;
 }
+
 @media only all and (min-width: 1200px) {
   .site-meta {
     width: 255px;
@@ -519,6 +515,10 @@ img {
   .site-meta {
     width: 100%;
   }
+}
+.site-meta {
+  float: right;
+  text-align: center;
 }
 
 @media only all and (max-width: 959px) {
@@ -566,6 +566,11 @@ main {
   }
 }
 
+.site-footer:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 .site-footer {
   border-top: 1px solid rgb(227, 226, 226);
   padding-top: 1.5em;
@@ -573,11 +578,6 @@ main {
   font-size: 14px;
   padding-bottom: 100px;
   margin-top: 100px;
-}
-.site-footer:after {
-  content: "";
-  display: table;
-  clear: both;
 }
 
 .copyright {
@@ -604,14 +604,32 @@ main {
 figure {
   padding: 0;
   margin: 0;
-  margin-bottom: 1em;
 }
 
-p {
-  margin: 0;
+.post-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  margin: 1em 0;
 }
-article p + p {
-  margin-top: 2em;
+.post-content > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.post-content h1, .post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6 {
+  text-align: start;
+}
+@media (max-width: 550px) {
+  .post-content .kg-card {
+    display: block;
+  }
+  .post-content .kg-card > * {
+    display: inline;
+  }
+  .post-content .kg-card .kg-callout-card, .post-content .kg-card .kg-callout-emoji {
+    display: inline-block;
+    padding-right: 0.3em;
+  }
 }
 
 a {
@@ -727,17 +745,22 @@ pre {
 .post:last-of-type {
   border-bottom: none;
 }
+@media (max-width: 550px) {
+  .post {
+    padding: 20px;
+  }
+}
 
+.post-meta:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 .post-meta {
   color: rgb(160, 156, 156);
   font-style: italic;
   font-size: 14px;
   margin-top: 30px;
-}
-.post-meta:after {
-  content: "";
-  display: table;
-  clear: both;
 }
 .post-meta a {
   color: rgb(160, 156, 156);
@@ -867,14 +890,14 @@ pre {
   color: rgb(160, 156, 156);
   font-weight: 400;
 }
-.search-results a {
-  margin-bottom: 10px;
-  color: #000;
-}
 .search-results a:after {
   content: "";
   display: table;
   clear: both;
+}
+.search-results a {
+  margin-bottom: 10px;
+  color: #000;
 }
 
 .kg-width-wide {
