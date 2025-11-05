@@ -1,9 +1,33 @@
-p {
-    margin: 0;
+.post-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    margin: 1em 0;
 
-    article & + p {
-        margin-top: 2em;
+    > * {
+        margin-top: 0;
+        margin-bottom: 0;
     }
+
+    h1, h2, h3, h4, h5, h6 {
+        text-align: start;
+    }
+
+    @media (max-width: 550px) {
+        .kg-card {
+            display: block;
+
+            & > * {
+                display: inline;
+            }
+
+            .kg-callout-card, .kg-callout-emoji {
+                display: inline-block;
+                padding-right: 0.3em;
+            }
+        }
+    }
+
 }
 
 a {
