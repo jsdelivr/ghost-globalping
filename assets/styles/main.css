@@ -806,8 +806,8 @@ pre {
   color: rgb(29, 28, 28);
 }
 .site-nav a:hover {
-  color: rgb(41, 145, 189);
-  border-bottom-color: rgb(41, 145, 189);
+  color: #17d4a7;
+  border-bottom-color: #17d4a7;
   text-decoration: none;
 }
 .site-nav input {
@@ -844,7 +844,7 @@ pre {
 
 .page-template .site-nav--link-about, .home-template .site-nav--link-blog {
   font-weight: bold;
-  color: rgb(41, 145, 189);
+  color: #17d4a7;
 }
 
 .search-submit {
@@ -865,7 +865,7 @@ pre {
   color: rgb(29, 28, 28);
 }
 .post-title a:hover {
-  color: #f26522;
+  color: #17d4a7;
   text-decoration: none;
 }
 
@@ -964,7 +964,7 @@ pre {
   border: 1px solid rgb(227, 226, 226);
 }
 .kg-bookmark-container:hover, .kg-bookmark-container:active {
-  border: 1px solid #f26522;
+  border: 1px solid #17d4a7;
 }
 
 .kg-bookmark-container:hover {

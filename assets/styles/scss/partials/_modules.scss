@@ -185,7 +185,7 @@
         color: $title-color;
 
         &:hover {
-            color: #f26522;
+            color: $title-color-hover;
             text-decoration: none;
         }
     }
@@ -287,7 +287,7 @@
     border: 1px solid $divider-color;
 
     &:hover, &:active {
-        border: 1px solid $hover-orange;
+        border: 1px solid $alt-color;
     }
 }
 
