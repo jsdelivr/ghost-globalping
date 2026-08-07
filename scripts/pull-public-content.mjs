@@ -30,6 +30,7 @@ const fetchResponse = async (url, type) => {
 		headers: {
 			'User-Agent': 'ghost-globalping-theme-local-preview',
 		},
+		signal: AbortSignal.timeout(30_000),
 	});
 
 	if (!response.ok) {

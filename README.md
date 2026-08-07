@@ -37,4 +37,14 @@ npm run ghost:stop
 npm run ghost:start
 ```
 
-To refresh the preview data, generate a new fixture with `npm run ghost:pull-content`. Import it into a fresh local Ghost database to avoid duplicate posts. Removing the Compose volume is destructive and is intentionally left as an explicit Docker command rather than an npm script.
+To refresh the preview data, generate a new fixture with `npm run ghost:pull-content`. Import it into a fresh local Ghost database to avoid duplicate posts.
+
+> [!WARNING]
+> `docker compose down -v` removes the `ghost-content` volume and all local Ghost data, including the owner setup. The next start creates a clean database that must be configured again.
+
+Reset the local database before starting Ghost and importing the refreshed fixture:
+
+```sh
+docker compose down -v
+npm run ghost:start
+```
