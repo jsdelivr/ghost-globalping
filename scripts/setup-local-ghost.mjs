@@ -1,5 +1,5 @@
-import { randomBytes } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash, randomBytes } from 'node:crypto';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -8,6 +8,7 @@ const ghostUrl = new URL(process.env.GHOST_URL ?? `http://localhost:${ghostPort}
 const stateRoot = path.resolve('.ghost-local');
 const stateDirectory = path.resolve(process.env.GHOST_STATE_DIR ?? stateRoot);
 const credentialsPath = path.join(stateDirectory, 'admin.json');
+const importStatePath = path.join(stateDirectory, 'import-state.json');
 const fixturePath = path.resolve(process.env.GHOST_FIXTURE_PATH ?? '.ghost-local/globalping-public.json');
 const adminEmail = 'local@globalping.test';
 const allowedHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -103,15 +104,49 @@ const readFixture = async () => {
 		throw new Error(`Unable to parse ${fixturePath}: ${error.message}`);
 	}
 
-	const postSlugs = fixture.data?.posts
-		?.filter(post => post.type === 'post' && typeof post.slug === 'string')
-		.map(post => post.slug);
+	const content = fixture.data?.posts;
+	const postSlugs = content
+		?.filter(item => item.type === 'post' && typeof item.slug === 'string')
+		.map(item => item.slug);
+	const pageSlugs = content
+		?.filter(item => item.type === 'page' && typeof item.slug === 'string')
+		.map(item => item.slug);
 
 	if (!postSlugs?.length) {
 		throw new Error(`${fixturePath} does not contain any posts.`);
 	}
 
-	return { contents, postSlugs };
+	return {
+		contents,
+		checksum: createHash('sha256').update(JSON.stringify(fixture.data)).digest('hex'),
+		pageSlugs: pageSlugs ?? [],
+		postSlugs,
+	};
+};
+
+const readImportState = async () => {
+	try {
+		const state = JSON.parse(await readFile(importStatePath, 'utf8'));
+
+		if (!/^[a-f0-9]{64}$/.test(state.checksum)) {
+			throw new Error('checksum must be a SHA-256 digest');
+		}
+
+		return state;
+	} catch (error) {
+		if (error.code === 'ENOENT') {
+			return null;
+		}
+
+		throw new Error(`Unable to read ${importStatePath}: ${error.message}`);
+	}
+};
+
+const writeImportState = async checksum => {
+	await mkdir(stateDirectory, { recursive: true });
+	const temporaryPath = `${importStatePath}.tmp`;
+	await writeFile(temporaryPath, `${JSON.stringify({ checksum }, null, 2)}\n`, 'utf8');
+	await rename(temporaryPath, importStatePath);
 };
 
 const createOwner = async credentials => {
@@ -170,12 +205,14 @@ const adminRequest = async (cookie, pathname, options = {}) => {
 	return assertOk(response, `${options.method ?? 'GET'} ${pathname}`);
 };
 
-const browsePosts = async (cookie, parameters = {}) => {
+const browseContent = async (cookie, resource, parameters = {}) => {
 	const query = new URLSearchParams(parameters);
-	const response = await adminRequest(cookie, `/ghost/api/admin/posts/?${query}`);
+	const response = await adminRequest(cookie, `/ghost/api/admin/${resource}/?${query}`);
 	const data = await response.json();
-	return data.posts ?? [];
+	return data[resource] ?? [];
 };
+
+const browsePosts = (cookie, parameters) => browseContent(cookie, 'posts', parameters);
 
 const findPost = async (cookie, slug) => {
 	const posts = await browsePosts(cookie, {
@@ -185,13 +222,24 @@ const findPost = async (cookie, slug) => {
 	return posts[0] ?? null;
 };
 
-const hasImportedFixture = async (cookie, fixtureSlugs) => {
-	const localPosts = await browsePosts(cookie, {
+const getSnapshotStatus = async (cookie, fixture) => {
+	const parameters = {
 		fields: 'slug',
 		limit: 'all',
-	});
-	const localSlugs = new Set(localPosts.map(post => post.slug));
-	return fixtureSlugs.some(slug => localSlugs.has(slug));
+	};
+	const [localPosts, localPages] = await Promise.all([
+		browseContent(cookie, 'posts', parameters),
+		browseContent(cookie, 'pages', parameters),
+	]);
+	const localPostSlugs = new Set(localPosts.map(post => post.slug));
+	const localPageSlugs = new Set(localPages.map(page => page.slug));
+	const importedPosts = fixture.postSlugs.filter(slug => localPostSlugs.has(slug)).length;
+	const importedPages = fixture.pageSlugs.filter(slug => localPageSlugs.has(slug)).length;
+
+	return {
+		complete: importedPosts === fixture.postSlugs.length && importedPages === fixture.pageSlugs.length,
+		hasMatches: importedPosts + importedPages > 0,
+	};
 };
 
 const deleteDefaultPost = async cookie => {
@@ -215,7 +263,7 @@ const importFixture = async (cookie, fixture) => {
 	const deadline = Date.now() + 60_000;
 
 	while (Date.now() < deadline) {
-		if (await hasImportedFixture(cookie, fixture.postSlugs)) {
+		if ((await getSnapshotStatus(cookie, fixture)).complete) {
 			console.log(`Imported ${fixturePath}.`);
 			return;
 		}
@@ -267,13 +315,21 @@ const main = async () => {
 	}
 
 	const cookie = await signIn(credentials);
-	const isImported = await hasImportedFixture(cookie, fixture.postSlugs);
+	const importState = await readImportState();
+	const snapshotStatus = await getSnapshotStatus(cookie, fixture);
 
-	if (isImported) {
+	if (isSetup && importState && importState.checksum !== fixture.checksum) {
+		throw new Error('The public fixture has changed since it was imported. Run "docker compose down -v" followed by "npm run ghost:setup" to refresh the local content.');
+	}
+
+	if (isSetup && importState && snapshotStatus.complete) {
 		console.log('Public fixture is already imported; skipping import.');
+	} else if (isSetup && (snapshotStatus.hasMatches || importState)) {
+		throw new Error('The local content does not match a complete imported fixture. Run "docker compose down -v" followed by "npm run ghost:setup" to rebuild it.');
 	} else {
 		await deleteDefaultPost(cookie);
 		await importFixture(cookie, fixture);
+		await writeImportState(fixture.checksum);
 	}
 
 	await activateTheme(cookie);
