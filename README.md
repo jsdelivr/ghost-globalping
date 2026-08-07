@@ -15,17 +15,13 @@ Prerequisites:
 - Node.js 22
 - Docker Desktop with Docker Compose
 
-Create a snapshot of the public Globalping blog content and start Ghost:
+Create a snapshot of the public Globalping blog content, start Ghost, create the local owner, import the snapshot, and activate this theme:
 
 ```sh
-npm run ghost:pull-content
-npm run ghost:start
+npm run ghost:setup
 ```
 
-Open http://localhost:2368/ghost and complete the one-time local owner setup. In local Ghost Admin:
-
-1. Import `.ghost-local/globalping-public.json` from the Import/Export settings.
-2. Open the theme settings and activate the installed `globalping` theme.
+The command prints the generated local admin credentials and stores them in the ignored `.ghost-local/admin.json` file. Open http://localhost:2368 to preview the theme or http://localhost:2368/ghost to use Ghost Admin. Re-running the command keeps the existing local owner and skips the import when the public fixture is already present.
 
 The repository is mounted directly as the theme, so edits to existing theme files are available without rebuilding the container. If a newly added theme file is not detected, restart Ghost.
 
@@ -37,14 +33,12 @@ npm run ghost:stop
 npm run ghost:start
 ```
 
-To refresh the preview data, generate a new fixture with `npm run ghost:pull-content`. Import it into a fresh local Ghost database to avoid duplicate posts.
-
-> [!WARNING]
-> `docker compose down -v` removes the `ghost-content` volume and all local Ghost data, including the owner setup. The next start creates a clean database that must be configured again.
-
-Reset the local database before starting Ghost and importing the refreshed fixture:
+To refresh the imported preview data, reset the local database and run the setup again:
 
 ```sh
 docker compose down -v
-npm run ghost:start
+npm run ghost:setup
 ```
+
+> [!WARNING]
+> `docker compose down -v` removes the `ghost-content` volume and all local Ghost data. The setup command recreates the owner with the credentials already saved in `.ghost-local/admin.json` and imports the latest generated fixture.
