@@ -222,6 +222,14 @@ const findPost = async (cookie, slug) => {
 	return posts[0] ?? null;
 };
 
+const findPage = async (cookie, slug) => {
+	const pages = await browseContent(cookie, 'pages', {
+		filter: `slug:${slug}`,
+		limit: '1',
+	});
+	return pages[0] ?? null;
+};
+
 const getSnapshotStatus = async (cookie, fixture) => {
 	const parameters = {
 		fields: 'slug',
@@ -248,6 +256,15 @@ const deleteDefaultPost = async cookie => {
 	if (post) {
 		await adminRequest(cookie, `/ghost/api/admin/posts/${post.id}/`, { method: 'DELETE' });
 		console.log('Deleted the default Coming soon post.');
+	}
+};
+
+const deleteDefaultPage = async cookie => {
+	const page = await findPage(cookie, 'about');
+
+	if (page) {
+		await adminRequest(cookie, `/ghost/api/admin/pages/${page.id}/`, { method: 'DELETE' });
+		console.log('Deleted the default About page.');
 	}
 };
 
@@ -328,6 +345,7 @@ const main = async () => {
 		throw new Error('The local content does not match a complete imported fixture. Run "docker compose down -v" followed by "npm run ghost:setup" to rebuild it.');
 	} else {
 		await deleteDefaultPost(cookie);
+		await deleteDefaultPage(cookie);
 		await importFixture(cookie, fixture);
 		await writeImportState(fixture.checksum);
 	}
