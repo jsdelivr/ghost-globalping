@@ -10,6 +10,7 @@ const stateDirectory = path.resolve(process.env.GHOST_STATE_DIR ?? stateRoot);
 const credentialsPath = path.join(stateDirectory, 'admin.json');
 const importStatePath = path.join(stateDirectory, 'import-state.json');
 const fixturePath = path.resolve(process.env.GHOST_FIXTURE_PATH ?? '.ghost-local/globalping-public.json');
+const routesPath = path.resolve('scripts/local-routes.yaml');
 const adminEmail = 'local@globalping.test';
 const allowedHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
 const relativeStateDirectory = path.relative(stateRoot, stateDirectory);
@@ -296,6 +297,18 @@ const activateTheme = async cookie => {
 	console.log('Activated the globalping theme.');
 };
 
+const uploadRoutes = async cookie => {
+	const routes = await readFile(routesPath);
+	const form = new FormData();
+	form.append('routes', new Blob([routes], { type: 'application/yaml' }), path.basename(routesPath));
+
+	await adminRequest(cookie, '/ghost/api/admin/settings/routes/yaml/', {
+		method: 'POST',
+		body: form,
+	});
+	console.log(`Uploaded ${routesPath}.`);
+};
+
 const verifyHomepage = async cookie => {
 	const [latestPost] = await browsePosts(cookie, {
 		fields: 'slug',
@@ -351,6 +364,7 @@ const main = async () => {
 	}
 
 	await activateTheme(cookie);
+	await uploadRoutes(cookie);
 	await verifyHomepage(cookie);
 
 	console.log(`Local Ghost is ready at ${ghostUrl}`);

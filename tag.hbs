@@ -6,8 +6,8 @@
 		<h1>{{#match tag.slug "announcement"}}Announcements{{else}}{{#match tag.slug "news"}}Monthly recaps{{else}}{{#match tag.slug "tutorial"}}Guides{{else}}{{#match tag.slug "globalping"}}Globalping{{else}}{{tag.name}}{{/match}}{{/match}}{{/match}}{{/match}}</h1>
 		{{#if tag.description}}<p>{{tag.description}}</p>{{/if}}
 	</header>
-	<h2 class="screen-reader">Articles</h2>
-	<section class="post-feed" aria-label="Articles in this topic">
+	<h2 id="topic-articles" class="screen-reader">Articles</h2>
+	<section class="post-feed" aria-labelledby="topic-articles">
 		{{#foreach posts}}
 			{{> "post-card" priority=@first}}
 		{{/foreach}}

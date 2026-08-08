@@ -13,8 +13,8 @@
 			</div>
 		</header>
 	{{/author}}
-	<h2 class="screen-reader">Articles</h2>
-	<section class="post-feed" aria-label="Articles by this author">
+	<h2 id="author-articles" class="screen-reader">Articles</h2>
+	<section class="post-feed" aria-labelledby="author-articles">
 		{{#foreach posts}}
 			{{> "post-card" priority=@first}}
 		{{/foreach}}

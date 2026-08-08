@@ -892,6 +892,11 @@ summary:focus-visible {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+#main-content,
+.post-content [id] {
+  scroll-margin-top: 80px;
+}
+
 .site-header__inner {
   display: flex;
   align-items: center;
@@ -1471,6 +1476,7 @@ summary:focus-visible {
 
 .error-page {
   display: grid;
+  position: relative;
   min-height: calc(100vh - 64px);
   min-height: calc(100dvh - 64px);
   margin: 0;
@@ -1667,6 +1673,9 @@ summary:focus-visible {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   .mobile-menu[open] nav {
     animation: none;
   }

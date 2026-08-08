@@ -1,5 +1,5 @@
 {{#get "posts" filter="tag:-content" include="tags" limit=@config.posts_per_page page=pagination.page }}
-	<section class="post-feed" aria-label="Articles">
+	<section class="post-feed" aria-labelledby="latest-articles">
 		{{#foreach posts}}
 			{{> "post-card" priority=@first}}
 		{{/foreach}}
