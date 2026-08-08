@@ -1,8 +1,13 @@
 {{!< default}}
 {{! The tag above means - insert everything in this file into the {body} of the default.hbs template }}
 
-{{! The main content area on the homepage }}
-<main id="content" class="content" role="main">
+<main id="main-content" class="content content--home">
+	<header class="home-hero">
+		<p class="eyebrow">The Globalping blog</p>
+		<h1>Updates and insights from a global probe network</h1>
+		<p class="home-hero__description">Learn how to diagnose routing and latency issues, automate tests across your workflows, and follow what we’re building with our open-source community.</p>
+	</header>
+	<h2 id="latest-articles" class="screen-reader">Latest articles</h2>
 	{{! The tag below includes the post loop - partials/loop.hbs }}
 	{{> "loop"}}
 </main>

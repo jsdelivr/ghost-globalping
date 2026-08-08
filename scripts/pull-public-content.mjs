@@ -25,6 +25,15 @@ const compact = object => Object.fromEntries(
 	Object.entries(object).filter(([, value]) => value !== null && value !== undefined),
 );
 
+// Raw HTML imports are reparsed by Ghost and can lose card variants such as callout colors.
+const toMobiledocHtmlCard = html => JSON.stringify({
+	version: '0.3.1',
+	atoms: [],
+	cards: [['html', { html }]],
+	markups: [],
+	sections: [[10, 0]],
+});
+
 const fetchResponse = async (url, type) => {
 	const response = await fetch(url, {
 		headers: {
@@ -65,7 +74,7 @@ const mapContent = (item, type) => compact({
 	id: item.id,
 	title: item.title,
 	slug: item.slug,
-	html: item.html ?? '',
+	mobiledoc: toMobiledocHtmlCard(item.html ?? ''),
 	type,
 	status: 'published',
 	visibility: 'public',

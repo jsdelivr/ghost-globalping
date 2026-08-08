@@ -10,6 +10,7 @@ const stateDirectory = path.resolve(process.env.GHOST_STATE_DIR ?? stateRoot);
 const credentialsPath = path.join(stateDirectory, 'admin.json');
 const importStatePath = path.join(stateDirectory, 'import-state.json');
 const fixturePath = path.resolve(process.env.GHOST_FIXTURE_PATH ?? '.ghost-local/globalping-public.json');
+const routesPath = path.resolve('scripts/local-routes.yaml');
 const adminEmail = 'local@globalping.test';
 const allowedHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
 const relativeStateDirectory = path.relative(stateRoot, stateDirectory);
@@ -222,6 +223,14 @@ const findPost = async (cookie, slug) => {
 	return posts[0] ?? null;
 };
 
+const findPage = async (cookie, slug) => {
+	const pages = await browseContent(cookie, 'pages', {
+		filter: `slug:${slug}`,
+		limit: '1',
+	});
+	return pages[0] ?? null;
+};
+
 const getSnapshotStatus = async (cookie, fixture) => {
 	const parameters = {
 		fields: 'slug',
@@ -251,6 +260,15 @@ const deleteDefaultPost = async cookie => {
 	}
 };
 
+const deleteDefaultPage = async cookie => {
+	const page = await findPage(cookie, 'about');
+
+	if (page) {
+		await adminRequest(cookie, `/ghost/api/admin/pages/${page.id}/`, { method: 'DELETE' });
+		console.log('Deleted the default About page.');
+	}
+};
+
 const importFixture = async (cookie, fixture) => {
 	const form = new FormData();
 	form.append('importfile', new Blob([fixture.contents], { type: 'application/json' }), path.basename(fixturePath));
@@ -277,6 +295,18 @@ const importFixture = async (cookie, fixture) => {
 const activateTheme = async cookie => {
 	await adminRequest(cookie, '/ghost/api/admin/themes/globalping/activate/', { method: 'PUT' });
 	console.log('Activated the globalping theme.');
+};
+
+const uploadRoutes = async cookie => {
+	const routes = await readFile(routesPath);
+	const form = new FormData();
+	form.append('routes', new Blob([routes], { type: 'application/yaml' }), path.basename(routesPath));
+
+	await adminRequest(cookie, '/ghost/api/admin/settings/routes/yaml/', {
+		method: 'POST',
+		body: form,
+	});
+	console.log(`Uploaded ${routesPath}.`);
 };
 
 const verifyHomepage = async cookie => {
@@ -328,11 +358,13 @@ const main = async () => {
 		throw new Error('The local content does not match a complete imported fixture. Run "docker compose down -v" followed by "npm run ghost:setup" to rebuild it.');
 	} else {
 		await deleteDefaultPost(cookie);
+		await deleteDefaultPage(cookie);
 		await importFixture(cookie, fixture);
 		await writeImportState(fixture.checksum);
 	}
 
 	await activateTheme(cookie);
+	await uploadRoutes(cookie);
 	await verifyHomepage(cookie);
 
 	console.log(`Local Ghost is ready at ${ghostUrl}`);
