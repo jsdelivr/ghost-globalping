@@ -1732,6 +1732,21 @@ summary:focus-visible {
   }
 }
 @media (max-width: 500px) {
+  body.post-template {
+    background: var(--gp-surface);
+  }
+  .post-template .page-wrap {
+    width: 100%;
+  }
+  .content--post {
+    margin-top: 0;
+    margin-bottom: 40px;
+  }
+  .content--post .post {
+    padding: 24px 20px 32px;
+    border: 0;
+    border-radius: 0;
+  }
   .site-header__inner {
     gap: 8px;
   }
