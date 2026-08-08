@@ -7,6 +7,7 @@
 	},
 	"scripts": {
 		"build": "sass assets/styles/scss/main.scss assets/styles/main.css",
+		"dist": "npm run build && node -e \"require('fs').mkdirSync('dist', { recursive: true })\" && bestzip dist/globalping.zip \"*.hbs\" assets partials package.json",
 		"ghost:pull-content": "node scripts/pull-public-content.mjs",
 		"ghost:setup": "npm run ghost:pull-content && npm run ghost:start && node scripts/setup-local-ghost.mjs",
 		"ghost:start": "docker compose up -d",
@@ -17,6 +18,7 @@
 		"ghost-theme"
 	],
 	"devDependencies": {
+		"bestzip": "3.0.2",
 		"sass": "1.102.0"
 	},
 	"config": {

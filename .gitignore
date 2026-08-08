@@ -2,3 +2,4 @@
 .sass-cache
 .ghost-local/
 node_modules/
+dist/
