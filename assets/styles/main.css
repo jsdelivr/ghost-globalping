@@ -1744,6 +1744,10 @@ summary:focus-visible {
     border: 0;
     border-radius: 0;
   }
+  .post-content {
+    hyphens: auto;
+    hyphenate-limit-chars: 6 3 3;
+  }
   .site-header__inner {
     gap: 8px;
   }
