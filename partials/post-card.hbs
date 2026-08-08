@@ -19,6 +19,7 @@
 			<span class="topic-badge">
 				{{#has tag="announcement"}}Announcements{{else}}{{#has tag="news"}}Monthly recaps{{else}}{{#has tag="tutorial"}}Guides{{else}}Globalping{{/has}}{{/has}}{{/has}}
 			</span>
+			<span aria-hidden="true">·</span>
 			<time datetime="{{date format='YYYY-MM-DD'}}">{{date format="DD MMM YYYY"}}</time>
 			<span aria-hidden="true">·</span>
 			<span>{{reading_time}}</span>

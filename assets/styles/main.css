@@ -817,6 +817,10 @@ html {
 }
 
 body {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  flex-direction: column;
   margin: 0;
   background: var(--gp-background);
   color: var(--gp-ink);
@@ -1361,6 +1365,20 @@ summary:focus-visible {
   letter-spacing: -0.035em;
 }
 
+.post-header__meta {
+  margin: 0;
+}
+
+.post-header__authors a {
+  color: var(--gp-ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.post-header__authors a:hover {
+  color: var(--gp-mint);
+}
+
 .post-feature-image {
   margin: 24px 0 0;
   overflow: hidden;
@@ -1403,11 +1421,29 @@ summary:focus-visible {
   border-radius: 10px;
 }
 
-.post-card__meta.post-footer__meta {
-  margin: 24px 0 0;
+.post-content blockquote {
+  margin-right: 0;
+  margin-left: 0;
+  padding: 2px 0 2px 18px;
+  border-left: 3px solid var(--gp-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--gp-ink);
+  font-style: normal;
+  text-align: left;
+}
+
+.post-content blockquote > * {
+  margin: 0;
+  text-align: left;
+}
+
+.post-content blockquote > * + * {
+  margin-top: 0.75em;
 }
 
 .content--post .post-content {
+  margin-bottom: 0;
   margin-top: 24px;
 }
 
@@ -1424,7 +1460,10 @@ summary:focus-visible {
 
 .post-content pre {
   border-radius: 8px;
-  background: #e8edf1;
+  background: var(--gp-background);
+  color: var(--gp-ink);
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .post-content code {
@@ -1470,6 +1509,7 @@ summary:focus-visible {
 }
 
 .site-footer {
+  flex-grow: 1;
   margin: 80px 0 0;
   padding: 40px 0;
   border: 0;
@@ -1799,6 +1839,23 @@ summary:focus-visible {
     padding: 24px 20px 32px;
     border: 0;
     border-radius: 0;
+  }
+  .content--post .post-title {
+    font-size: 28px;
+  }
+  .post-feature-image,
+  .content--post .post-content {
+    margin-top: 20px;
+  }
+  .post-header__meta {
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--gp-background);
+  }
+  .post-header__meta .topic-badge,
+  .post-header__meta .topic-badge + [aria-hidden=true] {
+    display: none;
   }
   .post-content {
     hyphens: auto;
