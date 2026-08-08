@@ -523,7 +523,7 @@ summary:focus-visible {
     align-items: center;
     gap: 18px;
     width: min(100%, 790px);
-    margin: 44px auto 72px;
+    margin: 44px auto;
     color: var(--gp-muted);
     font-family: "Lexend", sans-serif;
     font-size: 13px;
@@ -558,6 +558,10 @@ summary:focus-visible {
     margin: 42px auto 70px;
 }
 
+.content--post {
+    margin-bottom: 48px;
+}
+
 .content--post .post,
 .content--page .post {
     margin: 0;
@@ -565,6 +569,10 @@ summary:focus-visible {
     border: 1px solid var(--gp-line);
     border-radius: 14px;
     background: var(--gp-surface);
+}
+
+.content--post .post {
+    padding-top: 40px;
 }
 
 .content--post .post-title,
@@ -587,13 +595,25 @@ summary:focus-visible {
 }
 
 .post-content {
-    gap: 1.15em;
+    gap: 0;
     color: #273447;
     font-size: 16px;
     line-height: 1.7;
     overflow-wrap: break-word;
     text-align: justify;
     word-break: normal;
+}
+
+.post-content > * + * {
+    margin-top: 1.15em;
+}
+
+.post-content > :is(h1, h2, h3, h4, h5, h6) + * {
+    margin-top: 0.75rem;
+}
+
+.post-content > * + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 2rem;
 }
 
 .post-content img {
@@ -628,6 +648,31 @@ summary:focus-visible {
     background: #e8edf1;
 }
 
+.post-content code {
+    -webkit-hyphens: none;
+    hyphens: none;
+}
+
+.post-content :not(pre) > code {
+    padding: 2px 5px;
+    border: 1px solid var(--gp-line);
+    border-radius: 4px;
+    background: var(--gp-background);
+    box-decoration-break: clone;
+    color: var(--gp-ink);
+    font-size: 0.9em;
+    font-weight: 500;
+    line-height: 1.4;
+    -webkit-box-decoration-break: clone;
+}
+
+.post #full-changelog,
+.post #full-changelog ~ h2,
+.post #full-changelog ~ ul,
+.post #full-changelog ~ ol {
+    text-align: left;
+}
+
 .post-content a,
 .post-content a:hover {
     color: var(--gp-mint);
@@ -651,6 +696,17 @@ summary:focus-visible {
     border: 0;
     background: var(--gp-navy);
     color: #c3cede;
+}
+
+.post-template .site-footer {
+    margin-top: 0;
+}
+
+.home-template .site-footer,
+.paged .site-footer,
+.tag-template .site-footer,
+.author-template .site-footer {
+    margin-top: 0;
 }
 
 .site-footer__inner {
@@ -867,7 +923,7 @@ summary:focus-visible {
         left: 0;
         right: 0;
         display: grid;
-        padding: 12px 0 18px;
+        padding: 0;
         border-top: 1px solid #dfe3e7;
         border-bottom: 1px solid #dfe3e7;
         background: var(--gp-surface);
@@ -910,7 +966,7 @@ summary:focus-visible {
 
     .mobile-menu__cta {
         width: max-content;
-        margin: 14px 20px 0;
+        margin: 14px 20px;
         padding: 0 18px;
     }
 }
@@ -997,7 +1053,7 @@ summary:focus-visible {
 
     .content--post {
         margin-top: 0;
-        margin-bottom: 40px;
+        margin-bottom: 20px;
     }
 
     .content--post .post {
