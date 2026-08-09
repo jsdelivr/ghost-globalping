@@ -1755,9 +1755,9 @@ summary:focus-visible {
   .mobile-menu nav > a:not(.mobile-menu__cta):hover,
   .mobile-menu__search:hover,
   .mobile-menu nav > a[aria-current=page],
-  .tag-announcement .mobile-menu a[href$="/tag/announcement/"],
-  .tag-news .mobile-menu a[href$="/tag/news/"],
-  .tag-tutorial .mobile-menu a[href$="/tag/tutorial/"],
+  .tag-product-updates .mobile-menu a[href$="/tag/product-updates/"],
+  .tag-ecosystem .mobile-menu a[href$="/tag/ecosystem/"],
+  .tag-monthly-recaps .mobile-menu a[href$="/tag/monthly-recaps/"],
   .page-about .mobile-menu a[href$="/about/"] {
     background: #f3f5f7;
     color: var(--gp-mint);

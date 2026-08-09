@@ -8,7 +8,7 @@
 				<h1 class="post-title">{{{title}}}</h1>
 				<div class="post-card__meta post-header__meta">
 					<span class="topic-badge">
-						{{#has tag="announcement"}}Announcements{{else}}{{#has tag="news"}}Monthly recaps{{else}}{{#has tag="tutorial"}}Guides{{else}}Globalping{{/has}}{{/has}}{{/has}}
+						{{#has tag="Product updates"}}Product updates{{else}}{{#has tag="Ecosystem"}}Ecosystem{{else}}{{#has tag="Monthly recaps"}}Monthly recaps{{else}}{{#has tag="Guides"}}Guides{{else}}Globalping{{/has}}{{/has}}{{/has}}{{/has}}
 					</span>
 					<span aria-hidden="true">·</span>
 					<span class="post-header__authors">By {{#foreach authors}}<a href="{{url}}">{{name}}</a>{{#unless @last}}, {{/unless}}{{/foreach}}</span>

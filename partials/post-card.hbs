@@ -17,7 +17,7 @@
 		<p class="post-card__excerpt">{{excerpt words="60"}}</p>
 		<div class="post-card__meta">
 			<span class="topic-badge">
-				{{#has tag="announcement"}}Announcements{{else}}{{#has tag="news"}}Monthly recaps{{else}}{{#has tag="tutorial"}}Guides{{else}}Globalping{{/has}}{{/has}}{{/has}}
+				{{#has tag="Product updates"}}Product updates{{else}}{{#has tag="Ecosystem"}}Ecosystem{{else}}{{#has tag="Monthly recaps"}}Monthly recaps{{else}}{{#has tag="Guides"}}Guides{{else}}Globalping{{/has}}{{/has}}{{/has}}{{/has}}
 			</span>
 			<span aria-hidden="true">·</span>
 			<time datetime="{{date format='YYYY-MM-DD'}}">{{date format="DD MMM YYYY"}}</time>

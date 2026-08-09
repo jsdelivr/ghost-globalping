@@ -3,7 +3,7 @@
 <main id="main-content" class="content content--archive">
 	<header class="archive-header">
 		<p class="eyebrow">Topic</p>
-		<h1>{{#match tag.slug "announcement"}}Announcements{{else}}{{#match tag.slug "news"}}Monthly recaps{{else}}{{#match tag.slug "tutorial"}}Guides{{else}}{{#match tag.slug "globalping"}}Globalping{{else}}{{tag.name}}{{/match}}{{/match}}{{/match}}{{/match}}</h1>
+		<h1>{{#match tag.slug "product-updates"}}Product updates{{else}}{{#match tag.slug "ecosystem"}}Ecosystem{{else}}{{#match tag.slug "monthly-recaps"}}Monthly recaps{{else}}{{#match tag.slug "guides"}}Guides{{else}}{{tag.name}}{{/match}}{{/match}}{{/match}}{{/match}}</h1>
 		{{#if tag.description}}<p>{{tag.description}}</p>{{/if}}
 	</header>
 	<h2 id="topic-articles" class="screen-reader">Articles</h2>
