@@ -7,9 +7,17 @@
 			<header class="post-header">
 				<h1 class="post-title">{{{title}}}</h1>
 				<div class="post-card__meta post-header__meta">
-					<span class="topic-badge">
-						{{#has tag="Product updates"}}Product updates{{else}}{{#has tag="Ecosystem"}}Ecosystem{{else}}{{#has tag="Monthly recaps"}}Monthly recaps{{else}}{{#has tag="Guides"}}Guides{{else}}Globalping{{/has}}{{/has}}{{/has}}{{/has}}
-					</span>
+					{{#has tag="Product updates"}}
+						<a class="topic-badge" href="{{@site.url}}/tag/product-updates/">Product updates</a>
+					{{else}}{{#has tag="Ecosystem"}}
+						<a class="topic-badge" href="{{@site.url}}/tag/ecosystem/">Ecosystem</a>
+					{{else}}{{#has tag="Monthly recaps"}}
+						<a class="topic-badge" href="{{@site.url}}/tag/monthly-recaps/">Monthly recaps</a>
+					{{else}}{{#has tag="Guides"}}
+						<a class="topic-badge" href="{{@site.url}}/tag/guides/">Guides</a>
+					{{else}}
+						<a class="topic-badge" href="{{@site.url}}">Globalping</a>
+					{{/has}}{{/has}}{{/has}}{{/has}}
 					<span aria-hidden="true">·</span>
 					<span class="post-header__authors">By {{#foreach authors}}<a href="{{url}}">{{name}}</a>{{#unless @last}}, {{/unless}}{{/foreach}}</span>
 					<span aria-hidden="true">·</span>
