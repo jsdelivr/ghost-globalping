@@ -105,20 +105,29 @@ module.exports = async ({ github, context, core }) => {
 		return;
 	}
 
+	const body = discussion.body.replace(/^# globalping-post-[^\r\n]*/, `# ${title}`);
+
+	if (body === discussion.body) {
+		core.setFailed('Unable to find the generated discussion heading.');
+		return;
+	}
+
 	await github.graphql(
-		`mutation($discussionId: ID!, $title: String!) {
-			updateDiscussion(input: { discussionId: $discussionId, title: $title }) {
+		`mutation($body: String!, $discussionId: ID!, $title: String!) {
+			updateDiscussion(input: { body: $body, discussionId: $discussionId, title: $title }) {
 				discussion {
+					body
 					title
 					url
 				}
 			}
 		}`,
 		{
+			body,
 			discussionId: discussion.node_id,
 			title,
 		},
 	);
 
-	core.info(`Renamed discussion to "${title}".`);
+	core.info(`Renamed discussion and its heading to "${title}".`);
 };
