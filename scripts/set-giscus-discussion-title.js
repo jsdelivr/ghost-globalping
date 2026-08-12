@@ -1,0 +1,83 @@
+module.exports = async ({ github, context, core }) => {
+	const discussion = context.payload.discussion;
+
+	if (discussion.category?.name !== 'Blog comments') {
+		core.info(`Skipping discussion in category ${discussion.category?.name ?? 'unknown'}.`);
+		return;
+	}
+
+	const links = discussion.body.match(/https?:\/\/[^\s<>\)]+/g) ?? [];
+	const postUrl = links
+		.map((link) => {
+			try {
+				return new URL(link);
+			} catch {
+				return null;
+			}
+		})
+		.find((url) => url?.protocol === 'https:' && url.hostname === 'blog.globalping.io');
+
+	if (!postUrl) {
+		core.setFailed('The discussion body does not contain a Globalping blog post URL.');
+		return;
+	}
+
+	const response = await fetch(postUrl, {
+		headers: { 'User-Agent': 'jsdelivr-giscus-title-action' },
+	});
+
+	if (!response.ok) {
+		core.setFailed(`Unable to fetch ${postUrl} (${response.status}).`);
+		return;
+	}
+
+	const html = await response.text();
+	const getAttribute = (tag, name) => tag?.match(new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, 'i'))?.[2];
+	const ogTitleTag = (html.match(/<meta\b[^>]*>/gi) ?? [])
+		.find((tag) => getAttribute(tag, 'property')?.toLowerCase() === 'og:title');
+	const encodedTitle = getAttribute(ogTitleTag, 'content')
+		?? html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1];
+
+	if (!encodedTitle) {
+		core.setFailed(`Unable to find a title in ${postUrl}.`);
+		return;
+	}
+
+	const entities = {
+		amp: '&',
+		apos: "'",
+		gt: '>',
+		lt: '<',
+		nbsp: ' ',
+		quot: '"',
+	};
+	const title = encodedTitle
+		.replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+		.replace(/&#x([\da-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)))
+		.replace(/&(amp|apos|gt|lt|nbsp|quot);/gi, (_, entity) => entities[entity.toLowerCase()])
+		.replace(/<[^>]*>/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+
+	if (!title || title.length > 256) {
+		core.setFailed(`The resolved title has an invalid length (${title.length}).`);
+		return;
+	}
+
+	await github.graphql(
+		`mutation($discussionId: ID!, $title: String!) {
+			updateDiscussion(input: { discussionId: $discussionId, title: $title }) {
+				discussion {
+					title
+					url
+				}
+			}
+		}`,
+		{
+			discussionId: discussion.node_id,
+			title,
+		},
+	);
+
+	core.info(`Renamed discussion to "${title}".`);
+};
