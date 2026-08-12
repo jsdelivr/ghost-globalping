@@ -1,6 +1,5 @@
-# ghost-jsdelivr-theme
-The Ghost theme for jsDelivr's blog
-
+# ghost-globalping
+The Ghost theme and discussions for Globalping's blog
 
 ### Build and package
 
