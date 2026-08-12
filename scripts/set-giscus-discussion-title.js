@@ -1,5 +1,8 @@
 module.exports = async ({ github, context, core }) => {
 	const discussion = context.payload.discussion;
+	const isAllowedPostUrl = (url) => url.protocol === 'https:'
+		&& url.hostname === 'blog.globalping.io'
+		&& url.port === '';
 
 	if (discussion.category?.name !== 'Blog comments') {
 		core.info(`Skipping discussion in category ${discussion.category?.name ?? 'unknown'}.`);
@@ -15,16 +18,55 @@ module.exports = async ({ github, context, core }) => {
 				return null;
 			}
 		})
-		.find((url) => url?.protocol === 'https:' && url.hostname === 'blog.globalping.io');
+		.find((url) => url && isAllowedPostUrl(url));
 
 	if (!postUrl) {
 		core.setFailed('The discussion body does not contain a Globalping blog post URL.');
 		return;
 	}
 
-	const response = await fetch(postUrl, {
-		headers: { 'User-Agent': 'jsdelivr-giscus-title-action' },
-	});
+	const maxRedirects = 5;
+	let response;
+	let responseUrl = postUrl;
+
+	for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
+		response = await fetch(responseUrl, {
+			headers: { 'User-Agent': 'jsdelivr-giscus-title-action' },
+			redirect: 'manual',
+		});
+
+		if (![301, 302, 303, 307, 308].includes(response.status)) {
+			break;
+		}
+
+		if (redirectCount === maxRedirects) {
+			core.setFailed(`Too many redirects while fetching ${postUrl}.`);
+			return;
+		}
+
+		const location = response.headers.get('location');
+
+		if (!location) {
+			core.setFailed(`Received a redirect without a location while fetching ${postUrl}.`);
+			return;
+		}
+
+		let redirectUrl;
+
+		try {
+			redirectUrl = new URL(location, responseUrl);
+		} catch {
+			core.setFailed(`Received an invalid redirect while fetching ${postUrl}.`);
+			return;
+		}
+
+		if (!isAllowedPostUrl(redirectUrl)) {
+			core.setFailed(`Refusing to follow redirect to ${redirectUrl}.`);
+			return;
+		}
+
+		responseUrl = redirectUrl;
+	}
 
 	if (!response.ok) {
 		core.setFailed(`Unable to fetch ${postUrl} (${response.status}).`);
@@ -55,7 +97,6 @@ module.exports = async ({ github, context, core }) => {
 		.replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
 		.replace(/&#x([\da-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)))
 		.replace(/&(amp|apos|gt|lt|nbsp|quot);/gi, (_, entity) => entities[entity.toLowerCase()])
-		.replace(/<[^>]*>/g, '')
 		.replace(/\s+/g, ' ')
 		.trim();
 
