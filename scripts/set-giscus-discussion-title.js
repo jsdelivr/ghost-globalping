@@ -1,3 +1,5 @@
+const { decode } = require('html-entities');
+
 module.exports = async ({ github, context, core }) => {
 	const discussion = context.payload.discussion;
 	const isAllowedPostUrl = (url) => url.protocol === 'https:'
@@ -26,54 +28,63 @@ module.exports = async ({ github, context, core }) => {
 	}
 
 	const maxRedirects = 5;
+	const requestSignal = AbortSignal.timeout(15_000);
+	let html;
 	let response;
 	let responseUrl = postUrl;
 
-	for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
-		response = await fetch(responseUrl, {
-			headers: { 'User-Agent': 'jsdelivr-giscus-title-action' },
-			redirect: 'manual',
-		});
+	try {
+		for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
+			response = await fetch(responseUrl, {
+				headers: { 'User-Agent': 'jsdelivr-giscus-title-action' },
+				redirect: 'manual',
+				signal: requestSignal,
+			});
 
-		if (![301, 302, 303, 307, 308].includes(response.status)) {
-			break;
+			if (![301, 302, 303, 307, 308].includes(response.status)) {
+				break;
+			}
+
+			if (redirectCount === maxRedirects) {
+				core.setFailed(`Too many redirects while fetching ${postUrl}.`);
+				return;
+			}
+
+			const location = response.headers.get('location');
+
+			if (!location) {
+				core.setFailed(`Received a redirect without a location while fetching ${postUrl}.`);
+				return;
+			}
+
+			let redirectUrl;
+
+			try {
+				redirectUrl = new URL(location, responseUrl);
+			} catch {
+				core.setFailed(`Received an invalid redirect while fetching ${postUrl}.`);
+				return;
+			}
+
+			if (!isAllowedPostUrl(redirectUrl)) {
+				core.setFailed(`Refusing to follow redirect to ${redirectUrl}.`);
+				return;
+			}
+
+			responseUrl = redirectUrl;
 		}
 
-		if (redirectCount === maxRedirects) {
-			core.setFailed(`Too many redirects while fetching ${postUrl}.`);
+		if (!response.ok) {
+			core.setFailed(`Unable to fetch ${postUrl} (${response.status}).`);
 			return;
 		}
 
-		const location = response.headers.get('location');
-
-		if (!location) {
-			core.setFailed(`Received a redirect without a location while fetching ${postUrl}.`);
-			return;
-		}
-
-		let redirectUrl;
-
-		try {
-			redirectUrl = new URL(location, responseUrl);
-		} catch {
-			core.setFailed(`Received an invalid redirect while fetching ${postUrl}.`);
-			return;
-		}
-
-		if (!isAllowedPostUrl(redirectUrl)) {
-			core.setFailed(`Refusing to follow redirect to ${redirectUrl}.`);
-			return;
-		}
-
-		responseUrl = redirectUrl;
-	}
-
-	if (!response.ok) {
-		core.setFailed(`Unable to fetch ${postUrl} (${response.status}).`);
+		html = await response.text();
+	} catch (error) {
+		core.setFailed(`Unable to fetch ${postUrl}: ${error instanceof Error ? error.message : error}.`);
 		return;
 	}
 
-	const html = await response.text();
 	const getAttribute = (tag, name) => tag?.match(new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, 'i'))?.[2];
 	const ogTitleTag = (html.match(/<meta\b[^>]*>/gi) ?? [])
 		.find((tag) => getAttribute(tag, 'property')?.toLowerCase() === 'og:title');
@@ -85,18 +96,7 @@ module.exports = async ({ github, context, core }) => {
 		return;
 	}
 
-	const entities = {
-		amp: '&',
-		apos: "'",
-		gt: '>',
-		lt: '<',
-		nbsp: ' ',
-		quot: '"',
-	};
-	const title = encodedTitle
-		.replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
-		.replace(/&#x([\da-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)))
-		.replace(/&(amp|apos|gt|lt|nbsp|quot);/gi, (_, entity) => entities[entity.toLowerCase()])
+	const title = decode(encodedTitle)
 		.replace(/\s+/g, ' ')
 		.trim();
 

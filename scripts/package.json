@@ -1,0 +1,7 @@
+{
+	"name": "ghost-globalping-scripts",
+	"private": true,
+	"dependencies": {
+		"html-entities": "2.6.0"
+	}
+}
